@@ -1,0 +1,666 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Banco {
+  IdBanco               Int                     @id(map: "PK__Banco__2D3F553E61FAD071") @default(autoincrement()) @db.SmallInt
+  Descripcion           String?                 @db.VarChar(150)
+  FechaRegistro         DateTime?               @db.DateTime
+  FechaModificacio      DateTime?               @db.DateTime
+  Estado                Boolean?
+  PersonaCuentaBancaria PersonaCuentaBancaria[]
+}
+
+model Colonia {
+  IdColonia         Int                @id(map: "PK__Colonia__A1580F66B68C2B8F") @default(autoincrement())
+  Descripcion       String             @db.VarChar(100)
+  FechaRegistro     DateTime?          @db.DateTime
+  FechaModificacion DateTime?          @db.DateTime
+  Estado            Boolean?
+  IdZona            Int
+  Zona              Zona               @relation(fields: [IdZona], references: [IdZona], onUpdate: NoAction, map: "fk_tzona")
+  PersonaDireccion  PersonaDireccion[]
+}
+
+model ConceptoPago {
+  IdConceptoPago       Int                    @id(map: "PK__Concepto__D7F72686467D2B55") @db.SmallInt
+  Descripcion          String?                @db.VarChar(75)
+  FechaRegistro        DateTime?              @db.DateTime
+  FechaModificacion    DateTime?              @db.DateTime
+  Estado               Boolean?
+  DetalleImportePedido DetalleImportePedido[]
+}
+
+model Contacto {
+  IdContacto          BigInt            @id(map: "PK_Contacto") @default(autoincrement())
+  IdTipoContacto      Int?              @db.SmallInt
+  IdSocio             Int?
+  Nombre              String?           @db.VarChar(150)
+  Puesto              String?           @db.VarChar(100)
+  FechaRegistro       DateTime?         @db.DateTime
+  IdUsuarioRegistro   Int?
+  Estado              Boolean?
+  FechaModificacion   DateTime?         @db.DateTime
+  UsuarioModificacion DateTime?         @db.DateTime
+  Predeterminado      Boolean?
+  NumeroColumna       Int?
+  TipoContacto        TipoContacto?     @relation(fields: [IdTipoContacto], references: [IdTipoContacto], onDelete: NoAction, onUpdate: NoAction, map: "FK_TipoContactos_Contactos")
+  PersonaEmail        PersonaEmail[]
+  PersonaTelefono     PersonaTelefono[]
+}
+
+model Departamento {
+  IdDepartamento    Int                @id(map: "PK__Departam__787A433D90B301D6") @default(autoincrement())
+  Descripcion       String             @db.VarChar(100)
+  FechaRegistro     DateTime?          @db.DateTime
+  FechaModificacion DateTime?          @db.DateTime
+  Estado            Boolean?
+  IdPais            Int?
+  Pais              Pais?              @relation(fields: [IdPais], references: [IdPais], onDelete: NoAction, onUpdate: NoAction, map: "fk_tpais")
+  Municipio         Municipio[]
+  PersonaDireccion  PersonaDireccion[]
+}
+
+model DetalleImportePedido {
+  IdDetalleImportePedido BigInt        @id(map: "PK__DetalleI__C7C5209FBB0F63AA") @default(autoincrement())
+  IdPedido               BigInt?
+  IdConceptoPago         Int?          @db.SmallInt
+  IdFormaPago            Int?          @db.SmallInt
+  IdMoneda               Int?          @db.SmallInt
+  MontoCobro             Float?        @db.Money
+  IdUsuarioRegistro      Int?
+  IdUsuarioModificacion  Int?
+  FechaRegistro          DateTime?     @db.DateTime
+  FechaModificacion      DateTime?     @db.DateTime
+  ConceptoPago           ConceptoPago? @relation(fields: [IdConceptoPago], references: [IdConceptoPago], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdConceptoPago")
+  FormaPago              FormaPago?    @relation(fields: [IdFormaPago], references: [IdFormaPago], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdFormaPago")
+  Moneda                 Moneda?       @relation(fields: [IdMoneda], references: [IdMoneda], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdMoneda")
+  Liquidacion            Liquidacion[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Dinstar_Acceso {
+  Id_Dinstar_Acceso Int?
+  Usuario           String?   @db.VarChar(50)
+  Password          Bytes?    @db.VarBinary(50)
+  FechaRegistro     DateTime? @db.DateTime
+  FechaModificacion DateTime? @db.DateTime
+  Estado            Boolean?
+
+  @@ignore
+}
+
+model EstadoPedido {
+  IdEstadoPedido    Int            @id(map: "PK_EstatusPedido") @db.SmallInt
+  Descripcion       String?        @db.VarChar(50)
+  FechaRegistro     DateTime?      @db.DateTime
+  FechaModificacion DateTime?      @db.DateTime
+  Estado            Boolean?
+  color             String?        @db.VarChar(50)
+  iconos            String?        @db.VarChar(50)
+  PedidoEstado      PedidoEstado[]
+}
+
+model FormaPago {
+  IdFormaPago          Int                    @id(map: "PK_FormaPago") @db.SmallInt
+  Descripcion          String?                @db.VarChar(50)
+  FechaRegistro        DateTime?              @db.DateTime
+  FechaModificacion    DateTime?              @db.DateTime
+  Estado               Boolean?
+  DetalleImportePedido DetalleImportePedido[]
+  Pedido               Pedido[]
+}
+
+model GestorDomiciliar {
+  IdDomiciliar                                                              Int                 @id(map: "PK__GestorDo__025C6AE582E2D1C7")
+  IdPersona                                                                 Int?
+  FechaAlta                                                                 DateTime?           @db.DateTime
+  FechaBaja                                                                 DateTime?           @db.DateTime
+  IdUsuarioRegistro                                                         Int?
+  IdUsuarioBaja                                                             Int?
+  Estado                                                                    Boolean?
+  Persona                                                                   Persona?            @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_personaDom")
+  Correo_Domiciliar                                                         Correo_Domiciliar[]
+  PedidoDomiciliar_GestorDomiciliarToPedidoDomiciliar_IdDomiciliarEntrega   PedidoDomiciliar[]  @relation("GestorDomiciliarToPedidoDomiciliar_IdDomiciliarEntrega")
+  PedidoDomiciliar_GestorDomiciliarToPedidoDomiciliar_IdDomiciliarRecepcion PedidoDomiciliar[]  @relation("GestorDomiciliarToPedidoDomiciliar_IdDomiciliarRecepcion")
+}
+
+model Liquidacion {
+  IdLiquidacion          BigInt                @id(map: "PK__Liquidac__83204E468A09A5F4") @default(autoincrement())
+  Liquidacion            String?               @db.VarChar(75)
+  Observacion            String?               @db.VarChar(200)
+  IdDetalleImportePedido BigInt?
+  FechaCreacion          DateTime?             @db.DateTime
+  FechaModificacion      DateTime?             @db.DateTime
+  UsuarioRegistro        Int?
+  UsuarioModificacion    Int?
+  DetalleImportePedido   DetalleImportePedido? @relation(fields: [IdDetalleImportePedido], references: [IdDetalleImportePedido], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdDetallePedido")
+}
+
+model MenuPerfil {
+  IdMenuPerfil      Int          @id(map: "PK__MenuPerf__CB60EC50201C6CE0") @default(autoincrement()) @db.SmallInt
+  IdRol             Int?         @db.SmallInt
+  IdMenuSistema     Int?         @db.SmallInt
+  FechaRegistro     DateTime?    @db.DateTime
+  FechaModificacion DateTime?    @db.DateTime
+  Estado            Boolean?
+  MenuSistema       MenuSistema? @relation(fields: [IdMenuSistema], references: [IdMenuSistema], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdMenuSistmea")
+  Rol               Rol?         @relation(fields: [IdRol], references: [IdRol], onDelete: NoAction, onUpdate: NoAction, map: "fk_Role")
+}
+
+model MenuSistema {
+  IdMenuSistema     Int            @id(map: "PK__MenuSist__AD5356475815CC04") @default(autoincrement()) @db.SmallInt
+  Descripcion       String?        @db.VarChar(100)
+  Url               String?        @db.VarChar(50)
+  IdMenuPadre       Int?           @db.SmallInt
+  Controlador       String?        @db.VarChar(100)
+  IdIconoSistema    Int?           @db.SmallInt
+  FechaRegistro     DateTime?      @db.DateTime
+  FechaModificacion DateTime?      @db.DateTime
+  Estado            Boolean?
+  TIconoSistema     TIconoSistema? @relation(fields: [IdIconoSistema], references: [IdIconoSistema], onDelete: NoAction, onUpdate: NoAction, map: "fk_TIconoSistema")
+  MenuPerfil        MenuPerfil[]
+}
+
+model Moneda {
+  IdMoneda             Int                    @id(map: "PK__Moneda__AA690671E1FC35AD") @db.SmallInt
+  Simbolo              String?                @db.Char(1)
+  Descripcion          String?                @db.VarChar(50)
+  FechaRegistro        DateTime?              @db.DateTime
+  FechaModificacio     DateTime?              @db.DateTime
+  Estado               Boolean?
+  DetalleImportePedido DetalleImportePedido[]
+  Pedido               Pedido[]
+}
+
+model Municipio {
+  IdMunicipio       Int          @id(map: "PK__Municipi__61005978FCD4C7DE") @default(autoincrement())
+  Descripcion       String       @db.VarChar(100)
+  FechaRegistro     DateTime?    @db.DateTime
+  FechaModificacion DateTime?    @db.DateTime
+  Estado            Boolean?
+  IdDepartamento    Int
+  Departamento      Departamento @relation(fields: [IdDepartamento], references: [IdDepartamento], onUpdate: NoAction, map: "fk_tdepartamento")
+  Ruta              Ruta[]
+  Zona              Zona[]
+}
+
+model Pais {
+  IdPais            Int            @id(map: "PK__Pais__FC850A7BC324EFFF") @default(autoincrement())
+  Descripcion       String         @db.VarChar(75)
+  FechaRegistro     DateTime?      @db.DateTime
+  FechaModificacion DateTime?      @db.DateTime
+  Estado            Boolean?
+  Departamento      Departamento[]
+}
+
+model Pedido {
+  IdPedido              BigInt                 @id(map: "PK_Pedido") @default(autoincrement())
+  IdMoneda              Int?                   @db.SmallInt
+  IdDireccionRecepcion  Int?
+  IdDireccionEntrega    Int?
+  IdTelefono            Int?
+  IdFormaPago           Int?                   @db.SmallInt
+  IdCuentaBancaria      Int?
+  FechaHoraEntrega      DateTime?              @db.DateTime
+  SolicitudCobro        Boolean?
+  MontoCobro            Decimal?               @db.Decimal(18, 2)
+  Observaciones         String?                @db.VarChar(500)
+  Especificaciones      String?                @db.VarChar(500)
+  FechaCreacion         DateTime?              @db.DateTime
+  FecharModificacion    DateTime?              @db.DateTime
+  UsuarioRegistro       Int?                   @db.SmallInt
+  UsuarioModificacion   Int?                   @db.SmallInt
+  IdTipoPedido          Int?                   @db.SmallInt
+  AntesDe               DateTime?              @db.Time
+  DespuesDe             DateTime?              @db.Time
+  PersonaCuentaBancaria PersonaCuentaBancaria? @relation(fields: [IdCuentaBancaria], references: [IdCuentaBancaria], onDelete: NoAction, onUpdate: NoAction, map: "FK_PersonasCuentasBancarias_Pedidos")
+  PersonaDireccion      PersonaDireccion?      @relation(fields: [IdDireccionRecepcion], references: [IdDireccion], onDelete: NoAction, onUpdate: NoAction, map: "FK_DireccionesRecepcion_Pedidos")
+  FormaPago             FormaPago?             @relation(fields: [IdFormaPago], references: [IdFormaPago], onDelete: NoAction, onUpdate: NoAction, map: "FK_FormasPagos_Pedidos")
+  Moneda                Moneda?                @relation(fields: [IdMoneda], references: [IdMoneda], onDelete: NoAction, onUpdate: NoAction, map: "FK_Monedas_Pedidos")
+  TipoPedido            TipoPedido?            @relation(fields: [IdTipoPedido], references: [IdTipoPedido], onDelete: NoAction, onUpdate: NoAction, map: "fk_idTipoPedido")
+  TarifaPedido          TarifaPedido[]
+}
+
+model PedidoDomiciliar {
+  IdPedidoDomiciliar                                                        Int               @id(map: "PK__PedidoDo__4E9C6450654FB023") @default(autoincrement())
+  IdPedido                                                                  BigInt?
+  IdDomiciliarRecepcion                                                     Int?
+  IdDomiciliarEntrega                                                       Int?
+  IdUsuarioRegistro                                                         Int?
+  IdUsuarioModificacion                                                     Int?
+  FechaRegistro                                                             DateTime?         @db.DateTime
+  FechaModificacion                                                         DateTime?         @db.DateTime
+  Estado                                                                    Boolean?
+  GestorDomiciliar_GestorDomiciliarToPedidoDomiciliar_IdDomiciliarEntrega   GestorDomiciliar? @relation("GestorDomiciliarToPedidoDomiciliar_IdDomiciliarEntrega", fields: [IdDomiciliarEntrega], references: [IdDomiciliar], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdIdDomiciliarEntrega")
+  GestorDomiciliar_GestorDomiciliarToPedidoDomiciliar_IdDomiciliarRecepcion GestorDomiciliar? @relation("GestorDomiciliarToPedidoDomiciliar_IdDomiciliarRecepcion", fields: [IdDomiciliarRecepcion], references: [IdDomiciliar], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdDomiciliar")
+}
+
+model PedidoEstado {
+  IdPedidoEstado Int           @id(map: "PK_PedidoEstado") @default(autoincrement())
+  IdPedido       BigInt?
+  IdEstadoPedido Int?          @db.SmallInt
+  FechaInicio    DateTime?     @db.DateTime
+  FechaFin       DateTime?     @db.DateTime
+  Estado         Boolean?
+  Observacion    String?       @db.VarChar(150)
+  EstadoPedido   EstadoPedido? @relation(fields: [IdEstadoPedido], references: [IdEstadoPedido], onDelete: NoAction, onUpdate: NoAction, map: "FK_EstadosPedidos_PedidosEstados")
+}
+
+model Persona {
+  IdPersona             Int                     @id(map: "PK__Persona__2EC8D2AC2FB0ECF2") @default(autoincrement())
+  Nombres               String?                 @db.VarChar(150)
+  Apellidos             String?                 @db.VarChar(150)
+  NombreEmpresa         String?                 @db.VarChar(150)
+  RazonSocial           String?                 @db.VarChar(100)
+  PuestoContacto        String?                 @db.VarChar(100)
+  IdSocioCliente        Int?
+  FechaRegistro         DateTime?               @db.DateTime
+  FechaModificacion     DateTime?               @db.DateTime
+  Estado                Boolean?
+  IdTipoPersona         Int?                    @db.SmallInt
+  UsuarioRegistro       Int?
+  UsuarioModificacion   Int?
+  TipoPersona           TipoPersona?            @relation(fields: [IdTipoPersona], references: [IdTipoPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipoPersona")
+  GestorDomiciliar      GestorDomiciliar[]
+  PersonaCuentaBancaria PersonaCuentaBancaria[]
+  PersonaDireccion      PersonaDireccion[]
+  PersonaEmail          PersonaEmail[]
+  PersonaIdentificacion PersonaIdentificacion[]
+  PersonaTelefono       PersonaTelefono[]
+  Socio                 Socio[]
+  Usuario               Usuario[]
+}
+
+model PersonaCuentaBancaria {
+  IdCuentaBancaria     Int                 @id(map: "PK__PersonaC__98C58F7514B09D1A") @default(autoincrement())
+  IdPersona            Int?
+  IdBanco              Int?                @db.SmallInt
+  IdTipoCuentaBancaria Int?                @db.SmallInt
+  NumeroCuenta         Bytes?              @db.VarBinary(50)
+  FechaRegistro        DateTime?           @db.DateTime
+  FechaActualizacion   DateTime?           @db.DateTime
+  Estado               Boolean?
+  NombreCuenta         String?             @db.VarChar(250)
+  Predeterminado       Boolean?
+  Banco                Banco?              @relation(fields: [IdBanco], references: [IdBanco], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdBnco")
+  Persona              Persona?            @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_IdPerso")
+  TipoCuentaBancaria   TipoCuentaBancaria? @relation(fields: [IdTipoCuentaBancaria], references: [IdTipoCuentaBancaria], onDelete: NoAction, onUpdate: NoAction, map: "fk_TipoCuenta")
+  Pedido               Pedido[]
+}
+
+model PersonaDireccion {
+  IdDireccion                                           Int            @id(map: "PK_PersonaDireccion") @default(autoincrement())
+  Descripcion                                           String?        @db.VarChar(250)
+  IdDepartamento                                        Int?
+  IdZona                                                Int?
+  IdColonia                                             Int?
+  IdTipoDireccion                                       Int?           @db.SmallInt
+  IdPersona                                             Int?
+  IdContacto                                            BigInt?
+  FechaCreacion                                         DateTime?      @db.DateTime
+  FecharModificacion                                    DateTime?      @db.DateTime
+  UsuarioRegistro                                       Int?
+  UsuarioModificacion                                   Int?
+  Estado                                                Boolean?
+  Predeterminado                                        Boolean?
+  IdMunicipio                                           Int?
+  ReferenciaDireccion                                   String?        @db.VarChar(300)
+  Colonia                                               Colonia?       @relation(fields: [IdColonia], references: [IdColonia], onDelete: NoAction, onUpdate: NoAction, map: "fk_colonia")
+  Departamento                                          Departamento?  @relation(fields: [IdDepartamento], references: [IdDepartamento], onDelete: NoAction, onUpdate: NoAction, map: "fk_departamento")
+  Persona                                               Persona?       @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_personID")
+  TipoDireccion                                         TipoDireccion? @relation(fields: [IdTipoDireccion], references: [IdTipoDireccion], onDelete: NoAction, onUpdate: NoAction, map: "fk_tipoDireccion")
+  Zona                                                  Zona?          @relation(fields: [IdZona], references: [IdZona], onDelete: NoAction, onUpdate: NoAction, map: "fk_zona")
+  Usuario_PersonaDireccion_UsuarioModificacionToUsuario Usuario?       @relation("PersonaDireccion_UsuarioModificacionToUsuario", fields: [UsuarioModificacion], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarioM")
+  Usuario_PersonaDireccion_UsuarioRegistroToUsuario     Usuario?       @relation("PersonaDireccion_UsuarioRegistroToUsuario", fields: [UsuarioRegistro], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_usuarioR")
+  Pedido                                                Pedido[]
+}
+
+model PersonaEmail {
+  IdPersonaEmail      Int       @id(map: "PK_PersonaEmail") @default(autoincrement())
+  IdTipoEmail         Int?      @db.SmallInt
+  IdPersona           Int?
+  IdContacto          BigInt?
+  Email               String    @db.VarChar(100)
+  FechaRegistro       DateTime? @db.DateTime
+  FechaModificacion   DateTime? @db.DateTime
+  UsuarioRegistro     Int?      @db.SmallInt
+  UsuarioModificacion Int?      @db.SmallInt
+  Estado              Boolean?
+  Predeterminado      Boolean?
+  Contacto            Contacto? @relation(fields: [IdContacto], references: [IdContacto], onDelete: NoAction, onUpdate: NoAction, map: "FK_Contactos_PersonaEmails")
+  Persona             Persona?  @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "FK_Personas_PersonaEmails")
+}
+
+model PersonaIdentificacion {
+  IdPersonaIdentificacion Int                 @id(map: "PK__PersonaI__96794367946FC5D7") @default(autoincrement())
+  IdTipoIdentificacion    Int?                @db.SmallInt
+  Descripcion             String?             @db.VarChar(50)
+  IdPersona               Int?
+  FechaRegistro           DateTime?           @db.DateTime
+  FechaModificacion       DateTime?           @db.DateTime
+  Estado                  Boolean?
+  IdTipoIdentificacionDPI Int?
+  DPI                     String?             @db.VarChar(50)
+  Persona                 Persona?            @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_Persona")
+  TipoIdentificacion      TipoIdentificacion? @relation(fields: [IdTipoIdentificacion], references: [IdTipoIdentificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_TipoIdentificacion")
+}
+
+model PersonaTelefono {
+  IdPersonaTelefono   Int       @id(map: "PK_PersonaTelefono") @default(autoincrement())
+  IdTipoTelefono      Int?      @db.SmallInt
+  IdPersona           Int?
+  IdContacto          BigInt?
+  Telefono            String    @db.VarChar(15)
+  FechaRegistro       DateTime? @db.DateTime
+  FechaModificacion   DateTime? @db.DateTime
+  UsuarioRegistro     Int?      @db.SmallInt
+  UsuarioModificacion Int?      @db.SmallInt
+  Estado              Boolean?
+  Predeterminado      Boolean?
+  Contacto            Contacto? @relation(fields: [IdContacto], references: [IdContacto], onDelete: NoAction, onUpdate: NoAction, map: "FK_Contactos_PersonaTelefonos")
+  Persona             Persona?  @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "FK_Personas_PersonaTelefonos")
+}
+
+model reporteria {
+  IdReporteria  Int      @id(map: "PK__reporter__C1656F55E3F2FC45") @default(autoincrement())
+  Estado        Boolean?
+  Titulo        String?  @db.VarChar(100)
+  Procedimiento String?  @db.VarChar(100)
+  Descripcion   String?  @db.VarChar(200)
+}
+
+model Rol {
+  IdRol             Int          @id(map: "PK__Rol__2A49584CF498D6EB") @default(autoincrement()) @db.SmallInt
+  Descripcion       String?      @db.VarChar(50)
+  FechaRegistro     DateTime?    @db.DateTime
+  FechaModificacion DateTime?    @db.DateTime
+  Estado            Boolean?
+  MenuPerfil        MenuPerfil[]
+  UsuarioRol        UsuarioRol[]
+}
+
+model Ruta {
+  IdRuta              Int        @id(map: "PK__Ruta__887538FEB8E0683D") @default(autoincrement())
+  IdSector            BigInt?
+  IdMunicipio         Int?
+  IdZona              Int?
+  FechaRegistro       DateTime?  @db.DateTime
+  FechaModificacion   DateTime?  @db.DateTime
+  UsuarioRegistro     Int?
+  UsuarioModificacion Int?
+  Estado              Boolean?
+  Municipio           Municipio? @relation(fields: [IdMunicipio], references: [IdMunicipio], onDelete: NoAction, onUpdate: NoAction, map: "FK_MunicipioRuta")
+  Sector              Sector?    @relation(fields: [IdSector], references: [IdSector], onDelete: NoAction, onUpdate: NoAction, map: "FK_Sector")
+  Zona                Zona?      @relation(fields: [IdZona], references: [IdZona], onDelete: NoAction, onUpdate: NoAction, map: "FK_ZonaRuta")
+}
+
+model RutaSector {
+  IdRutaSector                            Int       @id(map: "PK__RutaSect__B117C7FBD9F8BCA6") @default(autoincrement())
+  SectorOrigen                            BigInt?
+  SectorDestino                           BigInt?
+  Monto                                   Float?    @db.Money
+  FechaRegistro                           DateTime? @db.DateTime
+  FechaModificacion                       DateTime? @db.DateTime
+  UsuarioRegistro                         Int?
+  UsuarioModificacion                     Int?
+  Estado                                  Boolean?
+  Sector_RutaSector_SectorDestinoToSector Sector?   @relation("RutaSector_SectorDestinoToSector", fields: [SectorDestino], references: [IdSector], onDelete: NoAction, onUpdate: NoAction, map: "FK_SectorDestino")
+  Sector_RutaSector_SectorOrigenToSector  Sector?   @relation("RutaSector_SectorOrigenToSector", fields: [SectorOrigen], references: [IdSector], onDelete: NoAction, onUpdate: NoAction, map: "FK_SectorOrigen")
+}
+
+model Sector {
+  IdSector                                          BigInt         @id(map: "PK__Sector__D0011C18A404453E")
+  Descripcion                                       String?        @db.VarChar(50)
+  FechaRegistro                                     DateTime?      @db.DateTime
+  FechaModificacion                                 DateTime?      @db.DateTime
+  Estado                                            Boolean?
+  Ruta                                              Ruta[]
+  RutaSector_RutaSector_SectorDestinoToSector       RutaSector[]   @relation("RutaSector_SectorDestinoToSector")
+  RutaSector_RutaSector_SectorOrigenToSector        RutaSector[]   @relation("RutaSector_SectorOrigenToSector")
+  TarifaPedido_SectorToTarifaPedido_IdSectorDestino TarifaPedido[] @relation("SectorToTarifaPedido_IdSectorDestino")
+  TarifaPedido_SectorToTarifaPedido_IdSectorOrigen  TarifaPedido[] @relation("SectorToTarifaPedido_IdSectorOrigen")
+}
+
+model Socio {
+  IdSocio                                  BigInt    @id(map: "PK_Socio")
+  IdPersona                                Int?
+  FechaRegistro                            DateTime? @db.DateTime
+  IdUsuarioRegistro                        Int?
+  FechaBaja                                DateTime? @db.DateTime
+  IdUsuarioBaja                            Int?
+  Estado                                   Boolean?
+  Persona                                  Persona?  @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "FK_Personas_Socios")
+  Usuario_Socio_IdUsuarioBajaToUsuario     Usuario?  @relation("Socio_IdUsuarioBajaToUsuario", fields: [IdUsuarioBaja], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "FK_Usuarios_Socios_2")
+  Usuario_Socio_IdUsuarioRegistroToUsuario Usuario?  @relation("Socio_IdUsuarioRegistroToUsuario", fields: [IdUsuarioRegistro], references: [IdUsuario], onDelete: NoAction, onUpdate: NoAction, map: "FK_Usuarios_Socios_1")
+}
+
+model TarifaPedido {
+  IdTarifaPedido                              Int       @id(map: "PK__TarifaPe__423E51C7B96813D9") @default(autoincrement())
+  IdSectorOrigen                              BigInt?
+  IdSectorDestino                             BigInt?
+  Monto                                       Float?    @db.Money
+  IdPedido                                    BigInt?
+  UsuarioRegistro                             Int?
+  UsuarioModificacion                         Int?
+  FechaRegistro                               DateTime? @db.DateTime
+  FechaModificacion                           DateTime? @db.DateTime
+  Estado                                      Boolean?
+  Pedido                                      Pedido?   @relation(fields: [IdPedido], references: [IdPedido], onDelete: NoAction, onUpdate: NoAction, map: "FK_PedidoRuta")
+  Sector_SectorToTarifaPedido_IdSectorDestino Sector?   @relation("SectorToTarifaPedido_IdSectorDestino", fields: [IdSectorDestino], references: [IdSector], onDelete: NoAction, onUpdate: NoAction, map: "FK_SectorDestinoPedido")
+  Sector_SectorToTarifaPedido_IdSectorOrigen  Sector?   @relation("SectorToTarifaPedido_IdSectorOrigen", fields: [IdSectorOrigen], references: [IdSector], onDelete: NoAction, onUpdate: NoAction, map: "FK_SectorOrigenPedido")
+}
+
+model TIconoSistema {
+  IdIconoSistema    Int           @id(map: "PK__TIconoSi__7C885E951697F512") @default(autoincrement()) @db.SmallInt
+  Descripcion       String?       @db.VarChar(50)
+  IconoNombre       String?       @db.VarChar(50)
+  FechaRegistro     DateTime?     @db.DateTime
+  FechaModificacion DateTime?     @db.DateTime
+  Estado            Boolean?
+  MenuSistema       MenuSistema[]
+}
+
+model Tigo_Acceso {
+  TigoId         Int      @id(map: "PK_tigo_acceso") @default(autoincrement())
+  OrganizationID String   @unique(map: "UN_tigo_acceso") @db.VarChar(100)
+  ShortCodeID    String   @db.VarChar(100)
+  NombreFiscal   String?  @db.VarChar(100)
+  UserName       String?  @db.VarChar(50)
+  ApiSecret      String   @db.VarChar(200)
+  ApiKey         String   @db.VarChar(200)
+  Url            String   @db.VarChar(200)
+  MSISDN         String?  @db.VarChar(30)
+  Estado         Boolean?
+}
+
+model TipoContacto {
+  IdTipoContacto    Int        @id(map: "PK_TipoContacto") @db.SmallInt
+  Descripcion       String?    @db.VarChar(150)
+  FechaRegistro     DateTime?  @db.DateTime
+  FechaModificacion DateTime?  @db.DateTime
+  Estado            Boolean?
+  Contacto          Contacto[]
+}
+
+model TipoCuentaBancaria {
+  IdTipoCuentaBancaria  Int                     @id(map: "PK__TipoCuen__D6BB8B365B28B71C") @default(autoincrement()) @db.SmallInt
+  Descripcion           String?                 @db.VarChar(50)
+  FechaRegistro         DateTime?               @db.DateTime
+  FechaModificacio      DateTime?               @db.DateTime
+  Estado                Boolean?
+  PersonaCuentaBancaria PersonaCuentaBancaria[]
+}
+
+model TipoDireccion {
+  IdTipoDireccion  Int                @id(map: "PK__TipoDire__1279FA0EC9E068A9") @default(autoincrement()) @db.SmallInt
+  Descripcion      String?            @db.VarChar(50)
+  FechaRegistro    DateTime?          @db.DateTime
+  FechaModificacio DateTime?          @db.DateTime
+  Estado           Boolean?
+  PersonaDireccion PersonaDireccion[]
+}
+
+model TipoEmail {
+  IdTipoEmail        Int       @id(map: "PK__TipoEmai__08062E9CC8F20131") @default(autoincrement()) @db.SmallInt
+  Descripcion        String?   @db.VarChar(50)
+  FechaCreacion      DateTime? @db.DateTime
+  FechaActualizacion DateTime? @db.DateTime
+  Estado             Boolean?
+}
+
+model TipoEstado {
+  IdTipoEstado       Int       @id(map: "PK__TipoEsta__21A386D4302A1A2B") @default(autoincrement()) @db.SmallInt
+  Descripcion        String?   @db.VarChar(25)
+  FechaRegistro      DateTime? @db.DateTime
+  FechaActualizacion DateTime? @db.DateTime
+  Estado             Boolean?
+}
+
+model TipoFormaPago {
+  IdFormaPago        Int       @id(map: "PK__TipoForm__C777CA68A90783F2") @default(autoincrement()) @db.SmallInt
+  Descripcion        String?   @db.VarChar(35)
+  FechaRegistro      DateTime? @db.DateTime
+  FechaActualizacion DateTime? @db.DateTime
+  Estado             Boolean?
+}
+
+model TipoIdentificacion {
+  IdTipoIdentificacion  Int                     @id(map: "PK__TipoIden__F521C6A86489F030") @default(autoincrement()) @db.SmallInt
+  Descripcion           String?                 @db.VarChar(50)
+  FechaCreacion         DateTime?               @db.DateTime
+  FechaActualizacion    DateTime?               @db.DateTime
+  Estado                Boolean?
+  PersonaIdentificacion PersonaIdentificacion[]
+}
+
+model TipoPedido {
+  IdTipoPedido      Int       @id(map: "PK_TipoPedido") @db.SmallInt
+  Descripcion       String?   @db.VarChar(50)
+  FechaRegistro     DateTime? @db.DateTime
+  FechaModificacion DateTime? @db.DateTime
+  Estado            Boolean?
+  Pedido            Pedido[]
+}
+
+model TipoPersona {
+  IdTipoPersona     Int       @id(map: "PK__TipoPers__79FCAFBF182DFC55") @default(autoincrement()) @db.SmallInt
+  Descripcion       String?   @db.VarChar(50)
+  FechaRegistro     DateTime? @db.DateTime
+  FechaModificacion DateTime? @db.DateTime
+  Estado            Boolean?
+  Persona           Persona[]
+}
+
+model TipoProducto {
+  IdTipoProducto     Int       @id(map: "PK__TipoProd__A974F92037DB9050") @default(autoincrement()) @db.SmallInt
+  Descripcion        String?   @db.VarChar(30)
+  FechaRegistro      DateTime? @db.DateTime
+  FechaActualizacion DateTime? @db.DateTime
+  Estado             Boolean?
+}
+
+model TipoTelefono {
+  IdTipoTelefono     Int       @id(map: "PK__TipoTele__6FA65CBF0ED99E14") @default(autoincrement()) @db.SmallInt
+  Descripcion        String?   @db.VarChar(20)
+  FechaCreacion      DateTime? @db.DateTime
+  FechaActualizacion DateTime? @db.DateTime
+  Estado             Boolean?
+}
+
+model Usuario {
+  IdUsuario                                                      Int                @id(map: "PK__Usuario__5B65BF97349BC405") @default(autoincrement())
+  IdPersona                                                      Int?
+  Usuarios                                                       String?            @db.VarChar(25)
+  Password                                                       Bytes?             @db.VarBinary(50)
+  PasswordAnterior                                               Bytes?             @db.VarBinary(50)
+  IntentosFallidos                                               Int?               @db.SmallInt
+  UsuarioBloqueado                                               Boolean?
+  UltimaFechaLogueado                                            DateTime?          @db.DateTime
+  FechaCambioPasssord                                            DateTime?          @db.DateTime
+  FechaRegistro                                                  DateTime?          @db.DateTime
+  FechaModificacion                                              DateTime?          @db.DateTime
+  Estado                                                         Boolean?
+  Persona                                                        Persona?           @relation(fields: [IdPersona], references: [IdPersona], onDelete: NoAction, onUpdate: NoAction, map: "fk_PersonaID")
+  PersonaDireccion_PersonaDireccion_UsuarioModificacionToUsuario PersonaDireccion[] @relation("PersonaDireccion_UsuarioModificacionToUsuario")
+  PersonaDireccion_PersonaDireccion_UsuarioRegistroToUsuario     PersonaDireccion[] @relation("PersonaDireccion_UsuarioRegistroToUsuario")
+  Socio_Socio_IdUsuarioBajaToUsuario                             Socio[]            @relation("Socio_IdUsuarioBajaToUsuario")
+  Socio_Socio_IdUsuarioRegistroToUsuario                         Socio[]            @relation("Socio_IdUsuarioRegistroToUsuario")
+}
+
+model UsuarioRol {
+  IdUsuarioRol      Int       @id(map: "PK__UsuarioR__6806BF4A34B16809") @default(autoincrement()) @db.SmallInt
+  IdRol             Int?      @db.SmallInt
+  IdUsuario         Int?
+  FechaRegistro     DateTime? @db.DateTime
+  FechaModificacion DateTime? @db.DateTime
+  Estado            Boolean?
+  Rol               Rol?      @relation(fields: [IdRol], references: [IdRol], onDelete: NoAction, onUpdate: NoAction, map: "fk_Rol")
+}
+
+model Zona {
+  IdZona            Int                @id(map: "PK__Zona__F631C12DA21296AE") @default(autoincrement())
+  Descripcion       String             @db.VarChar(100)
+  FechaRegistro     DateTime?          @db.DateTime
+  FechaModificacion DateTime?          @db.DateTime
+  Estado            Boolean?
+  IdMunicipio       Int
+  Municipio         Municipio          @relation(fields: [IdMunicipio], references: [IdMunicipio], onUpdate: NoAction, map: "fk_tmunicipio")
+  Colonia           Colonia[]
+  PersonaDireccion  PersonaDireccion[]
+  Ruta              Ruta[]
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Optacheck_Status {
+  IdOptacheck_Status Int       @default(autoincrement())
+  JSON               String?   @db.NText
+  IdPedido           BigInt?
+  NombreRecibe       String?   @db.VarChar(50)
+  SolicitudCobro     String?   @db.VarChar(10)
+  ValorProducto      Float?    @db.Money
+  ValorEnvio         Float?    @db.Money
+  Monto              Float?    @db.Money
+  AgenteEntrega      String?   @db.VarChar(50)
+  RecibioPago        String?   @db.VarChar(10)
+  Imagen             String?   @db.VarChar(Max)
+  TipoEntrega        String?   @db.VarChar(50)
+  FechaRegistro      DateTime? @db.DateTime
+  FechaModificacion  DateTime? @db.DateTime
+  Estado             Boolean?
+  IdMision           String?   @db.VarChar(50)
+  CorreoDomiciliar   String?   @db.VarChar(50)
+
+  @@ignore
+}
+
+model Correo_Domiciliar {
+  IdCorreoDomiliar    Int               @id(map: "PK__Correo_D__F207A99F97694C69")
+  Correo              String?           @db.VarChar(50)
+  Password            Bytes?            @db.VarBinary(15)
+  IdDomiciliar        Int?
+  FechaCreacion       DateTime?         @db.DateTime
+  UsuarioRegistro     Boolean?
+  FechaModificacion   DateTime?         @db.DateTime
+  UsuarioModificacion DateTime?         @db.DateTime
+  Estado              Boolean?
+  GestorDomiciliar    GestorDomiciliar? @relation(fields: [IdDomiciliar], references: [IdDomiciliar], onDelete: NoAction, onUpdate: NoAction, map: "fk_Correo_Domiciliar")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model Optacheck_Status_logs {
+  IdOptacheck_Status Int       @default(autoincrement())
+  JSON               String?   @db.NText
+  IdPedido           BigInt?
+  TipoEntrega        String?   @db.VarChar(50)
+  FechaRegistro      DateTime? @db.DateTime
+  FechaModificacion  DateTime? @db.DateTime
+  Estado             Boolean?
+
+  @@ignore
+}
